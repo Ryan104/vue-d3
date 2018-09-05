@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Bar</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- vue -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- d3 -->
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <!-- d3 data parser imports -->
+  <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+  <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <button @click="renderChart">render</button>
+    <button @click="updateBars">update</button>
+    <select v-model="countryCode">
+      <option>USA</option>
+      <option>GER</option>
+      <option>GRE</option>
+    </select>
+    <input v-model="scale" type='number'>
+    <svg v-if="chartData.length" class="chart" :height="chartHeight" :width="chartWidth"></svg>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
