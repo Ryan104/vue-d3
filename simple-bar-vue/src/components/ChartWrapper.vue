@@ -1,5 +1,12 @@
 <template>
-  <BarChart v-if="chartData.length" :chart-data="chartData" />  
+  <div>
+    <BarChart v-if="chartData.length" :chart-data="chartData" />  
+    <select v-model="countryCode">
+      <option>USA</option>
+      <option>GER</option>
+      <option>GRE</option>
+    </select>
+  </div>
 </template>
 
 <script lang="ts">
