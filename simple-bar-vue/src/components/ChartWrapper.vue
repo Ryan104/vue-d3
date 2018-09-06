@@ -15,6 +15,15 @@ import axios from 'axios';
 import { csvParse } from 'd3-dsv';
 import BarChart from '@/components/BarChart.vue';
 
+interface medalData {
+  year: number,
+  city: string,
+  bronzeEvents: Set<string>,
+  silverEvents: Set<string>,
+  goldEvents: Set<string>,
+  totalMedals: number,
+}
+
 export default Vue.extend({
   components: {
     BarChart,
@@ -39,19 +48,20 @@ export default Vue.extend({
       const { bronzeEvents, silverEvents, goldEvents } = yearData;
       return bronzeEvents.size + silverEvents.size + goldEvents.size;
     },
-    yearDataFactory(year: string|number, city: string): any {
+    yearDataFactory(year: number, city: string): medalData {
       return {
         year,
         city,
         bronzeEvents: new Set(),
         silverEvents: new Set(),
         goldEvents: new Set(),
+        totalMedals: 0,
       };
     },
   },
   computed: {
     /** Format data, group by year, filter by country */
-    chartData(): any[] {
+    chartData(): medalData[] {
       if (this.rawData.length) {
         const filteredByCountry: any[] = this.rawData.filter(d => d.Country === this.countryCode);
 
@@ -78,7 +88,7 @@ export default Vue.extend({
         }, {});
 
         const years: string[] = Object.keys(groupedByYear).sort();
-        return years.map((year: string): any[] => ({
+        return years.map((year: string): medalData => ({
           ...groupedByYear[year],
           totalMedals: this.getTotalMedals(groupedByYear[year]),
         }));
