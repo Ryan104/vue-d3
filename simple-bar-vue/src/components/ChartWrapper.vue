@@ -1,5 +1,5 @@
 <template>
-  <BarChart :chart-data="chartData" />  
+  <BarChart v-if="chartData.length" :chart-data="chartData" />  
 </template>
 
 <script lang="ts">
@@ -14,15 +14,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      chartData: [
-        { value: 60 },
-        { value: 40 },
-        { value: 20 },
-        { value: 80 },
-        { value: 70 },
-        { value: 80 },
-        { value: 10 },
-      ],
+      countryCode: 'USA',
       rawData: [] as any[],
     }
   },
@@ -30,11 +22,62 @@ export default Vue.extend({
     this.getData('@/assets/summer.csv');
   },
   methods: {
-    getData(path: string) {
+    getData(path: string): void {
       axios.get('summer.csv').then(res => {
         const parsed = csvParse(res.data);
         this.rawData = parsed;
       });
+    },
+    getTotalMedals(yearData: any): number {
+      const { bronzeEvents, silverEvents, goldEvents } = yearData;
+      return bronzeEvents.size + silverEvents.size + goldEvents.size;
+    },
+    yearDataFactory(year: string|number, city: string): any {
+      return {
+        year,
+        city,
+        bronzeEvents: new Set(),
+        silverEvents: new Set(),
+        goldEvents: new Set(),
+      };
+    },
+  },
+  computed: {
+    /** Format data, group by year, filter by country */
+    chartData(): any[] {
+      if (this.rawData.length) {
+        const filteredByCountry: any[] = this.rawData.filter(d => d.Country === this.countryCode);
+
+        const groupedByYear: any = filteredByCountry.reduce((groupedData, d) => {
+          if (!groupedData[d.Year]) {
+            groupedData[d.Year] = this.yearDataFactory(d.Year, d.City);
+          }
+
+          switch (d.Medal.toLowerCase()) {
+            case 'bronze':
+              groupedData[d.Year].bronzeEvents.add(d.Event);
+              break;
+            case 'silver':
+              groupedData[d.Year].silverEvents.add(d.Event);
+              break;
+            case 'gold':
+              groupedData[d.Year].goldEvents.add(d.Event);
+              break;
+            default:
+              break;
+          }
+
+          return groupedData;
+        }, {});
+
+        const years: string[] = Object.keys(groupedByYear).sort();
+        return years.map((year: string): any[] => ({
+          ...groupedByYear[year],
+          totalMedals: this.getTotalMedals(groupedByYear[year]),
+        }));
+      }
+
+      return [];
     },
   },
 });

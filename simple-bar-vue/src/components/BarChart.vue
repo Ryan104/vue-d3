@@ -1,9 +1,9 @@
 <template>
   <svg :height="chartHeight" :width="chartWidth">
     <g v-for="(data, i) in chartData" :key="i" fill="black" :transform="`translate(${i * barWidth}, 0)`">
-      <rect :height="data.value" :width="barWidth" :transform="`translate(0, ${chartHeight - data.value})`"></rect>
-      <text :transform="`translate(${barWidth / 2}, ${chartHeight - data.value - 10})`" fill="black">
-        {{ data.value }}
+      <rect :height="data.totalMedals" :width="barWidth" :transform="`translate(0, ${chartHeight - data.totalMedals})`"></rect>
+      <text :transform="`translate(${barWidth / 4}, ${chartHeight - data.totalMedals - 5})`" fill="black">
+        {{ data.totalMedals }}
       </text>
     </g>
   </svg>
@@ -21,7 +21,7 @@ export default Vue.extend({
   },
   data() {
     return {
-      chartHeight: 500,
+      chartHeight: 300,
       chartWidth: 800,
     };
   },
