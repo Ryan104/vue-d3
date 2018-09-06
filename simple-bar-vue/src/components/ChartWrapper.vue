@@ -38,17 +38,26 @@ export default Vue.extend({
     this.getData('@/assets/summer.csv');
   },
   methods: {
+    /**
+     * Fetch data from csv
+     */
     getData(path: string): void {
       axios.get('summer.csv').then(res => {
         const parsed = csvParse(res.data);
         this.rawData = parsed;
       });
     },
-    getTotalMedals(yearData: any): number {
-      const { bronzeEvents, silverEvents, goldEvents } = yearData;
+    /**
+     * Total the medal count for a given data point
+     */
+    getTotalMedals(data: medalData): number {
+      const { bronzeEvents, silverEvents, goldEvents } = data;
       return bronzeEvents.size + silverEvents.size + goldEvents.size;
     },
-    yearDataFactory(year: number, city: string): medalData {
+    /**
+     * Data point factory
+     */
+    medalDataFactory(year: number, city: string): medalData {
       return {
         year,
         city,
@@ -65,9 +74,10 @@ export default Vue.extend({
       if (this.rawData.length) {
         const filteredByCountry: any[] = this.rawData.filter(d => d.Country === this.countryCode);
 
+        // the dataset contains a medal for each athlete on a team event. Need to reduce them down to medal winning events
         const groupedByYear: any = filteredByCountry.reduce((groupedData, d) => {
           if (!groupedData[d.Year]) {
-            groupedData[d.Year] = this.yearDataFactory(d.Year, d.City);
+            groupedData[d.Year] = this.medalDataFactory(d.Year, d.City);
           }
 
           switch (d.Medal.toLowerCase()) {
