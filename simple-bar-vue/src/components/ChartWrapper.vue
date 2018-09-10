@@ -15,6 +15,15 @@ import axios from 'axios';
 import { csvParse } from 'd3-dsv';
 import BarChart from '@/components/BarChart.vue';
 
+interface medalData {
+  year: number,
+  city: string,
+  bronzeEvents: Set<string>,
+  silverEvents: Set<string>,
+  goldEvents: Set<string>,
+  totalMedals: number,
+}
+
 export default Vue.extend({
   components: {
     BarChart,
@@ -29,35 +38,46 @@ export default Vue.extend({
     this.getData('@/assets/summer.csv');
   },
   methods: {
+    /**
+     * Fetch data from csv
+     */
     getData(path: string): void {
       axios.get('summer.csv').then(res => {
         const parsed = csvParse(res.data);
         this.rawData = parsed;
       });
     },
-    getTotalMedals(yearData: any): number {
-      const { bronzeEvents, silverEvents, goldEvents } = yearData;
+    /**
+     * Total the medal count for a given data point
+     */
+    getTotalMedals(data: medalData): number {
+      const { bronzeEvents, silverEvents, goldEvents } = data;
       return bronzeEvents.size + silverEvents.size + goldEvents.size;
     },
-    yearDataFactory(year: string|number, city: string): any {
+    /**
+     * Data point factory
+     */
+    medalDataFactory(year: number, city: string): medalData {
       return {
         year,
         city,
         bronzeEvents: new Set(),
         silverEvents: new Set(),
         goldEvents: new Set(),
+        totalMedals: 0,
       };
     },
   },
   computed: {
     /** Format data, group by year, filter by country */
-    chartData(): any[] {
+    chartData(): medalData[] {
       if (this.rawData.length) {
         const filteredByCountry: any[] = this.rawData.filter(d => d.Country === this.countryCode);
 
+        // the dataset contains a medal for each athlete on a team event. Need to reduce them down to medal winning events
         const groupedByYear: any = filteredByCountry.reduce((groupedData, d) => {
           if (!groupedData[d.Year]) {
-            groupedData[d.Year] = this.yearDataFactory(d.Year, d.City);
+            groupedData[d.Year] = this.medalDataFactory(d.Year, d.City);
           }
 
           switch (d.Medal.toLowerCase()) {
@@ -78,7 +98,7 @@ export default Vue.extend({
         }, {});
 
         const years: string[] = Object.keys(groupedByYear).sort();
-        return years.map((year: string): any[] => ({
+        return years.map((year: string): medalData => ({
           ...groupedByYear[year],
           totalMedals: this.getTotalMedals(groupedByYear[year]),
         }));
