@@ -3,7 +3,7 @@
     <g :transform="chartTransform">
       <g v-for="(data, i) in pieData" :key="i" class="arc">
         <path :d="getPath(data)" :fill="chartColors[i]"></path>
-        <!-- add  and :dy="" -->
+        <text :transform="getLabelTransform(data)" dy="0.35em">{{ chartData[i].age }}</text>
       </g>
     </g>
   </svg>
@@ -25,10 +25,6 @@
         chartHeight: 500,
         chartWidth: 960,
         chartColors: ["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"],
-        endY: 0,
-        startX: 100,
-        startY: 100,
-        largeArcFlag: 100
       };
     },
     methods: {
@@ -37,6 +33,11 @@
         const path = arcGenerator(arcData);
         return path;
       },
+      getLabelTransform(data: DefaultArcObject): string {
+        const arcGenerator = arc().outerRadius(this.chartRadius - 40).innerRadius(this.chartRadius - 40);
+        const arcCenterCoords = arcGenerator.centroid(data);
+        return `translate(${arcCenterCoords})`;
+      },
     },
     computed: {
       chartRadius(): number {
@@ -44,9 +45,6 @@
       },
       chartTransform(): string {
         return "translate(" + this.chartWidth / 2 + "," + this.chartHeight / 2 + ")";
-      },
-      endX(): number {
-        return this.chartRadius - 10;
       },
       pieData(): PieArcDatum<number | { valueOf(): number; }>[] {
         const data: number[] = this.chartData.map(d => d.population);
@@ -58,7 +56,7 @@
 
 <style scoped>
   .arc text {
-    font: 10px sans-serif;
+    font: 12px sans-serif;
     text-anchor: middle;
   }
 
