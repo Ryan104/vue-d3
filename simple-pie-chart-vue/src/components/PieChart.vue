@@ -5,7 +5,7 @@
       <!-- Slice Groups -->
       <g v-for="(data, i) in chartData" :key="i" class="arc">
         <!-- Slice Arc -->
-        <path :d="arcPaths[i]" :fill="chartColors[i]"></path>
+        <path :d="arcPaths[i]" :fill="chartColors[i%6]"></path>
         <!-- Slice Label -->
         <text :transform="labelTransforms[i]" dy="0.35em">
           {{ data.age }}

@@ -2,6 +2,13 @@
   <div>
     <h1>Pie Chart</h1>
     <PieChart v-if="chartData.length" :chart-data="chartData" />
+    <div>
+      <label>Label</label>
+      <input type="text" v-model="newAge" />
+      <label>Data</label>
+      <input type="number" v-model="newPopulation" />
+      <button @click="addData()">ADD</button>
+    </div>
   </div>
 </template>
 
@@ -18,6 +25,8 @@ export default Vue.extend({
   data() {
     return {
       rawData: [] as any[],
+      newAge: null as string|null,
+      newPopulation: null as number|null,
     }
   },
   mounted() {
@@ -29,7 +38,17 @@ export default Vue.extend({
         const parsed = csvParse(res.data);
         this.rawData = parsed;
       });
-    }
+    },
+    addData() {
+      if (this.newAge && this.newPopulation) {
+        this.rawData.push({
+          age: this.newAge,
+          population: this.newPopulation,
+        });
+        this.newAge = null;
+        this.newPopulation = null;  
+      }
+    },
   },
   computed: {
     chartData(): any[] {
